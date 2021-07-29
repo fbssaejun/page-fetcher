@@ -12,15 +12,23 @@ const rl = readline.createInterface({
 
 
 request(url, (error, response, body) => {
-  console.log('error:', error); // Print the error if one occurred
+
+  if(!validUrl.isHttpsUri(url)) {
+    console.log("Invalid Url! Please type valid Url again. ")
+    return
+  }
+
   console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
   // console.log('body:', body); // Print the HTML for the Google homepage.
   if(fs.existsSync(savePath)) {
+
     rl.question('You are overwriting exsisting file! Would you like to overwrite? (y / n) ', (answer) => {
+
       if(answer === 'n') {
       console.log("Exiting fetcher")
       rl.close();
       }
+
       if(answer === 'y') {
         fs.writeFile(savePath, body, (err) => {
           if(err){
@@ -32,22 +40,12 @@ request(url, (error, response, body) => {
       }
     });
 
-    
-    } else if (!validUrl.isUri(url)) {
-      console.log("Invalid Url! Please type valid Url again. ")
-      rl.close()
-
-    } else {
+  } else {
 
       fs.writeFile(savePath, body, (err) => {
         if(err) {
-          throw Error("Error has been caused!!!")
+          throw Error("Invalid Path! Please type in a valid path")
         }
-        
-        //checks file path is valid
-        fs.access('path', fs.R_OK, (err) => {
-          if (!err) { console.log("File exists")}
-        });
 
         // fs.stat(body) can also fetch bytes
         console.log(`Downloaded ${body.length}bytes to ${savePath}`)
